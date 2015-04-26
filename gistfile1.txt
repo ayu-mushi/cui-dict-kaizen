@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# ref: CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); } (http://d.hatena.ne.jp/its_out_of_tune/20120610/1339311044)
+
+WEBLIO_URL="http://ejje.weblio.jp/content/$1"
+TMP_FILENAME="/tmp/cuijaegdect.html"
+DICT_FILENAME="/home/ayumu/Dropbox/dict.txt"
+
+if [ ! -e $DICT_FILENAME ]; then
+  touch $DICT_FILENAME
+fi
+
+curl -s $WEBLIO_URL > $TMP_FILENAME
+OUTPUT=$(grep 'name="description"' $TMP_FILENAME | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
+
+echo $OUTPUT
+
+# →の後に他の英単語を示して終わり(例. ranの意味や和訳。 【動詞】 →run の過去形.)という事があるので(参照してるのに→が無い場合や→があっても単語の参照でない場合とかもあるけど)、そういう場合には参照された他の英単語を再びこのコマンドに掛けるようにする
+case $OUTPUT in
+  *→*)
+    ANOTHER=`echo $OUTPUT | sed -e "s/^.*→\([^ ]*\).*$/\1/"`
+    je $ANOTHER;;
+esac
+
+# 調べた結果を辞書に書き出す
+echo $OUTPUT >> $DICT_FILENAME
