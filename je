@@ -20,6 +20,8 @@ case $OUTPUT in
   *→*)
     ANOTHER=`echo $OUTPUT | sed -e "s/^.*→\([^ ]*\).*$/\1/"`
     je $ANOTHER;;
+  *を参照*)
+    je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^\<]*\)を参照.*$/\1/"`;;
 esac
 
 # 調べた結果を辞書に書き出す
