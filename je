@@ -4,7 +4,7 @@
 
 WEBLIO_URL="http://ejje.weblio.jp/content/$1"
 TMP_FILENAME="/tmp/cuijaegdect.html"
-DICT_FILENAME="/home/ayumu/Dropbox/dict.txt"
+DICT_FILENAME="$HOME/Dropbox/dict.txt"
 
 if [ ! -e $DICT_FILENAME ]; then
   touch $DICT_FILENAME
