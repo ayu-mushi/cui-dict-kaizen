@@ -10,7 +10,7 @@ if [ ! -e $DICT_FILENAME ]; then
   touch $DICT_FILENAME
 fi
 
-AG=$(ag "^$1の意味や和訳" $DICT_FILENAME)
+AG=$(ag "^$1の意味や和訳|^$1を英語に訳すと" $DICT_FILENAME)
 
 if [ -z "$AG" ]; then
   curl -s $WEBLIO_URL > $TMP_FILENAME
