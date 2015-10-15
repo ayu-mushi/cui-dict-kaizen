@@ -10,18 +10,24 @@ if [ ! -e $DICT_FILENAME ]; then
   touch $DICT_FILENAME
 fi
 
-curl -s $WEBLIO_URL > $TMP_FILENAME
-OUTPUT=$(grep 'name="description"' $TMP_FILENAME | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
+AG=$(ag "^$1の意味や和訳" $DICT_FILENAME)
 
-echo $OUTPUT
+if [ -z "$AG" ]; then
+  curl -s $WEBLIO_URL > $TMP_FILENAME
+  OUTPUT=$(grep 'name="description"' $TMP_FILENAME | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
 
-# →の後に他の英単語を示して終わり(例. ranの意味や和訳。 【動詞】 →run の過去形.)という事があるので(参照してるのに→が無い場合や→があっても単語の参照でない場合とかもあるけど)、そういう場合には参照された他の英単語を再びこのコマンドに掛けるようにする
-case $OUTPUT in
-  *→*)
-    je `echo $OUTPUT | sed -e "s/^.*→\([^ ]*\).*$/\1/"`;;
-  *を参照*)
-    je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^\<]*\)を参照.*$/\1/"`;;
-esac
+  echo $OUTPUT
 
-# 調べた結果を辞書に書き出す
-echo $OUTPUT >> $DICT_FILENAME
+  # →の後に他の英単語を示して終わり(例. ranの意味や和訳。 【動詞】 →run の過去形.)という事があるので(参照してるのに→が無い場合や→があっても単語の参照でない場合とかもあるけど)、そういう場合には参照された他の英単語を再びこのコマンドに掛けるようにする
+  case $OUTPUT in
+    *→*)
+      je `echo $OUTPUT | sed -e "s/^.*→\([^ ]*\).*$/\1/"`;;
+    *を参照*)
+      je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^\<]*\)を参照.*$/\1/"`;;
+  esac
+
+  # 調べた結果を辞書に書き出す
+  echo $OUTPUT >> $DICT_FILENAME
+else
+  echo $AG
+fi
