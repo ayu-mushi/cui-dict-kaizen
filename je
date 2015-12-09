@@ -14,7 +14,7 @@ AG=$(ag "^$1の意味や和訳|^$1を英語に訳すと" $DICT)
 OUTPUT=""
 
 if [ -z "$AG" ]; then
-  OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' $TMP | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
+  OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
   # 調べた結果を辞書に書き出す
   echo $OUTPUT >> $DICT
 else
