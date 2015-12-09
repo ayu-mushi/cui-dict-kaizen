@@ -4,19 +4,19 @@
 # + メモ化 & 言及英単語を再帰的呼び出し
 
 WEBLIO="http://ejje.weblio.jp/content/$1"
-DICT_FILENAME="$HOME/Dropbox/dict.txt"
+DICT="$HOME/Dropbox/dict.txt"
 
-if [ ! -e $DICT_FILENAME ]; then
-  touch $DICT_FILENAME
+if [ ! -e $DICT ]; then
+  touch $DICT
 fi
 
-AG=$(ag "^$1の意味や和訳|^$1を英語に訳すと" $DICT_FILENAME)
+AG=$(ag "^$1の意味や和訳|^$1を英語に訳すと" $DICT)
 OUTPUT=""
 
 if [ -z "$AG" ]; then
   OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' $TMP | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
   # 調べた結果を辞書に書き出す
-  echo $OUTPUT >> $DICT_FILENAME
+  echo $OUTPUT >> $DICT
 else
   OUTPUT=$AG
 fi
@@ -28,4 +28,6 @@ case $OUTPUT in
     je `echo $OUTPUT | sed -e "s/^.*→\([^ ]*\).*$/\1/"`;;
   *を参照*)
     je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^\<]*\)を参照.*$/\1/"`;;
+  *Plural\ form\ of\ *.)
+    je `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\u]*\)\..*$/\1/"`;;
 esac
