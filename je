@@ -3,6 +3,9 @@
 # ref: CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); } (http://d.hatena.ne.jp/its_out_of_tune/20120610/1339311044)
 # + メモ化 & 言及英単語を再帰的呼び出し
 
+# 複数の語を分かち書きしたものからなる節を調べるときは語と語の間を(空白ではなく)プラス記号で区切る
+# 例: common law を調べるときは `je common+law`
+
 WEBLIO="http://ejje.weblio.jp/content/$1"
 DICT="$HOME/Dropbox/dict.txt"
 
@@ -10,7 +13,8 @@ if [ ! -e $DICT ]; then
   touch $DICT
 fi
 
-AG=$(ag "^$1の意味や和訳|^$1を英語に訳すと" $DICT)
+PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")の意味や和訳|^$(echo $1 | sed -e "s/\+/\ /g")を英語に訳すと"
+AG=$(ag -i "$PATTERN" $DICT)
 OUTPUT=""
 
 if [ -z "$AG" ]; then
@@ -24,10 +28,14 @@ fi
 echo $OUTPUT
 
 case $OUTPUT in
-  *→*\ の過去形\.*)
-    je `echo $OUTPUT | sed -e "s/^.*→\([^\ ]*\)\ の過去形\..*$/\1/"`;;
+  *→*\ の過去形*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
+  *→*\ の複数形*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
   *を参照*)
     je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^ ]*\)を参照.*$/\1/"`;;
-  *Plural\ form\ of\ *.)
+  *Plural\ form\ of\ *)
     je `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *Present\ participle\ of\ *)
+    je `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
 esac
