@@ -18,7 +18,7 @@ AG=$(ag -i "$PATTERN" $DICT)
 OUTPUT=""
 
 if [ -z "$AG" ]; then
-  OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/')
+  OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
   # 調べた結果を辞書に書き出す
   echo $OUTPUT >> $DICT
 else
