@@ -38,4 +38,6 @@ case $OUTPUT in
     je `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
   *Present\ participle\ of\ *)
     je `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *＝*)
+    je `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
 esac
