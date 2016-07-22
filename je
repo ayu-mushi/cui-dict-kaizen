@@ -50,5 +50,8 @@ getopts "w" opts
 
 case $opts in
   w) watch "je \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
-  ?) usual_execution "$1";;
+  ?) for arg in $@
+  do
+    usual_execution "$arg"
+  done;;
 esac
