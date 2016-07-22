@@ -46,14 +46,9 @@ case $OUTPUT in
 esac
 }
 
-function xsel_je(){
-  je "$(xsel --clipboard)"
-}
-
-getopts "wx" opts
+getopts "w" opts
 
 case $opts in
-  x) xsel_je;; # translate from clipboard
-  w) watch je -x;; # watch clipboard and traslate it repeatedly
+  w) watch "je \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
   ?) usual_execution "$1";;
 esac
