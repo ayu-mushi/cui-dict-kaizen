@@ -4,8 +4,9 @@
 # + メモ化 & 言及英単語を再帰的呼び出し
 
 # 複数の語を分かち書きしたものからなる節を調べるときは語と語の間を(空白ではなく)プラス記号で区切る
-# 例: common law を調べるときは `je common+law`
+# 例: Haskell Curry を調べるときは `je haskell+curry`
 
+function usual_execution(){
 WEBLIO="http://ejje.weblio.jp/content/$1"
 DICT="$HOME/Dropbox/dict.txt"
 
@@ -30,6 +31,8 @@ echo $OUTPUT
 case $OUTPUT in
   *→*\ の過去形*)
     je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
+  *→*\ の過去分詞*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去分詞.*$/\1/"`;;
   *→*\ の複数形*)
     je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
   *を参照*)
@@ -40,4 +43,17 @@ case $OUTPUT in
     je `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
   *＝*)
     je `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
+esac
+}
+
+function xsel_je(){
+  je "$(xsel --clipboard)"
+}
+
+getopts "wx" opts
+
+case $opts in
+  x) xsel_je;; # translate from clipboard
+  w) watch je -x;; # watch clipboard and traslate it repeatedly
+  ?) usual_execution "$1";;
 esac
