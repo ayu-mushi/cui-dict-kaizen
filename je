@@ -19,14 +19,18 @@ AG=$(ag -i "$PATTERN" $DICT)
 OUTPUT=""
 
 if [ -z "$AG" ]; then
-  OUTPUT=$(curl -s $WEBLIO | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
+  FILE=$(curl -s $WEBLIO)
+  DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
+  PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^.*class=phoneticEjjeDesc>\([^<]\)/\1/g' | sed -e 's/<\/span.*$//g')
+  OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
+  OUTPUT="$OUTPUT 発音: $PHONETIC"
   # 調べた結果を辞書に書き出す
-  echo $OUTPUT >> $DICT
+  echo "$OUTPUT" >> $DICT
 else
   OUTPUT=$AG
 fi
 
-echo $OUTPUT
+echo "$OUTPUT"
 
 case $OUTPUT in
   *→*\ の過去形*)
