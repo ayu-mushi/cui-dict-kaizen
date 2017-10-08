@@ -23,7 +23,7 @@ OUTPUT=""
 if [ -z "$AG" ] || [ $ISNEW = true ]; then
   FILE=$(curl -s $WEBLIO)
   DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
-  PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^.*class=phoneticEjjeDesc>\([^<]\)/\1/g' | sed -e 's/<\/span.*$//g')
+  PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
   OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
   OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
   # 調べた結果を辞書に書き出す
