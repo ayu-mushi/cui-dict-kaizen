@@ -1,5 +1,7 @@
-Linux Bash CLI/CUI 辞書引きコマンド
+Linux Bash CLI/CUI Weblio辞書引きコマンド
 ==================
+Keywords: Dictionary, Weblio, Japanese, English
+
 【参考】
 [CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); }](http://d.hatena.ne.jp/its\_out\_of\_tune/20120610/1339311044)
 
@@ -21,3 +23,10 @@ Linux Bash CLI/CUI 辞書引きコマンド
 `je -w` でクリップボード監視。ただしxselが必要。
 
 あと検索にagが必要だが、grepに書き換えても良い。
+
+##インストール
+```bash
+git clone https://github.com/ayu-mushi/cui-dict-kaizen
+cd path/to/cui-dict-kaizen
+sudo cp je /usr/local/bin
+```
