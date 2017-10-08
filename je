@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # ref: CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); } (http://d.hatena.ne.jp/its_out_of_tune/20120610/1339311044)
-# + メモ化 & 言及英単語を再帰的呼び出し
+# + メモ化 & 言及英単語を再帰的呼び出し & 発音 & クリップボード監視翻訳
 
 # 複数の語を分かち書きしたものからなる節を調べるときは語と語の間を(空白ではなく)プラス記号で区切る
 # 例: Haskell Curry を調べるときは `je haskell+curry`
+
+ISNEW=false
 
 function usual_execution(){
 WEBLIO="http://ejje.weblio.jp/content/$1"
@@ -18,12 +20,12 @@ PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")の意味や和訳|^$(echo $1 | sed -e 
 AG=$(ag -i "$PATTERN" $DICT)
 OUTPUT=""
 
-if [ -z "$AG" ]; then
+if [ -z "$AG" ] || [ $ISNEW = true ]; then
   FILE=$(curl -s $WEBLIO)
   DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
   PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^.*class=phoneticEjjeDesc>\([^<]\)/\1/g' | sed -e 's/<\/span.*$//g')
   OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
-  OUTPUT="$OUTPUT 発音: $PHONETIC"
+  OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
   # 調べた結果を辞書に書き出す
   echo "$OUTPUT" >> $DICT
 else
@@ -50,10 +52,11 @@ case $OUTPUT in
 esac
 }
 
-getopts "w" opts
+getopts "wn:" opts
 
 case $opts in
   w) watch "je \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
+  n) ISNEW=true usual_execution "$OPTARG" ISNEW=false;;
   ?) for arg in $@
   do
     usual_execution "$arg"
