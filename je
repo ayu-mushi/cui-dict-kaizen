@@ -17,19 +17,22 @@ if [ ! -e $DICT ]; then
 fi
 
 PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")の意味や和訳|^$(echo $1 | sed -e "s/\+/\ /g")を英語に訳すと"
-AG=$(ag -i "$PATTERN" $DICT)
+AG=$(ag -i --no-numbers "$PATTERN" $DICT | tail -n 1)
+TAG_PATTERN="s/<(\".*?\"|'.*?'|[^'\"])*?>//g"
 OUTPUT=""
 
 if [ -z "$AG" ] || [ $ISNEW = true ]; then
   FILE=$(curl -s $WEBLIO)
   DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
-  PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
+  #PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
+  PHONETIC=$(echo "$FILE" | ag --no-numbers '<b class=KejjeHt>' | sed -e 's/^.*<b class=KejjeLb>発音記号<\/b>//g' | sed -e "s/<b class=KejjeLb>音声を聞く<\/b>.*$//g")
+  PHONETIC=$(echo "$PHONETIC" | sed -e "s/<[^>]*>//g")
   OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
-  OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
+  OUTPUT="$OUTPUT 【発音】$PHONETIC"
   # 調べた結果を辞書に書き出す
   echo "$OUTPUT" >> $DICT
 else
-  OUTPUT=$AG
+  OUTPUT="(from dict)$AG"
 fi
 
 echo "$OUTPUT"
