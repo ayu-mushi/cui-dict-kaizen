@@ -9,7 +9,8 @@
 ISNEW=false
 
 function usual_execution(){
-WEBLIO="http://ejje.weblio.jp/content/$1"
+#WEBLIO="http://ejje.weblio.jp/content/$1"
+WEBLIO="https://ejje.weblio.jp/content/$1"
 DICT="$HOME/Dropbox/dict.txt"
 
 if [ ! -e $DICT ]; then
@@ -32,7 +33,7 @@ if [ -z "$AG" ] || [ $ISNEW = true ]; then
   # 調べた結果を辞書に書き出す
   echo "$OUTPUT" >> $DICT
 else
-  OUTPUT="(from dict)$AG"
+  OUTPUT="$AG(from dict)"
 fi
 
 echo "$OUTPUT"

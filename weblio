@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# ref: CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); } (http://d.hatena.ne.jp/its_out_of_tune/20120610/1339311044)
+# + メモ化 & 言及英単語を再帰的呼び出し
+
+# 複数の語を分かち書きしたものからなる節を調べるときは語と語の間を(空白ではなく)プラス記号で区切る
+# 例: Haskell Curry を調べるときは `je haskell+curry`
+
+function usual_execution(){
+WEBLIO="https://www.weblio.jp/content/$1"
+DICT="$HOME/Dropbox/weblio.txt"
+
+if [ ! -e $DICT ]; then
+  touch $DICT
+fi
+
+PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")とは?"
+AG=$(ag -i "$PATTERN" $DICT)
+OUTPUT=""
+
+if [ -z "$AG" ]; then
+  OUTPUT=$(curl -s "$WEBLIO" | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\).*$/\1/') # ^は[]の中では否定の意味
+  # 調べた結果を辞書に書き出す
+  echo $OUTPUT >> $DICT
+else
+  OUTPUT=$AG
+fi
+
+echo $OUTPUT
+
+case $OUTPUT in
+  *→*\ の過去形*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
+  *→*\ の過去分詞*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去分詞.*$/\1/"`;;
+  *→*\ の複数形*)
+    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
+  *を参照*)
+    je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^ ]*\)を参照.*$/\1/"`;;
+  *Plural\ form\ of\ *)
+    je `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *Present\ participle\ of\ *)
+    je `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *＝*)
+    je `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
+esac
+}
+
+getopts "w" opts
+
+case $opts in
+  w) watch "weblio \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
+  ?) for arg in $@
+  do
+    usual_execution "$arg"
+  done;;
+esac

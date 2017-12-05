@@ -1,0 +1,34 @@
+#!/bin/bash
+
+function usual_execution(){
+WEBLIO="http://www.kobun.weblio.jp/content/$1"
+DICT="$HOME/Dropbox/weblio.txt"
+
+if [ ! -e $DICT ]; then
+  touch $DICT
+fi
+
+PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")とは?"
+AG=$(ag -i "$PATTERN" $DICT)
+OUTPUT=""
+
+if [ -z "$AG" ]; then
+  OUTPUT=$(curl -s "$WEBLIO" | ag --no-numbers 'name="description"' | sed -e 's/<meta name="description" content="\([^"]*\).*$/\1/') # ^は[]の中では否定の意味
+  # 調べた結果を辞書に書き出す
+  echo $OUTPUT >> $DICT
+else
+  OUTPUT=$AG
+fi
+
+echo $OUTPUT
+}
+
+getopts "w" opts
+
+case $opts in
+  w) watch "weblio \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
+  ?) for arg in $@
+  do
+    usual_execution "$arg"
+  done;;
+esac
