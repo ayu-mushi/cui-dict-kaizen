@@ -1,0 +1,12 @@
+#!/bin/bash
+
+WEBLIO="https://ejje.weblio.jp/content/$1"
+
+FILE=$(curl -s $WEBLIO)
+
+AUDIO=$(echo $FILE | sed -e "s/>/>\n/g" | ag 'mp3" type="audio/mpeg">' | tail -n 1)
+
+AUDIOURL=$(echo $AUDIO | sed -e 's/<source src="\(.*mp3\)".*/\1/g')
+curl -s $AUDIOURL | mpg321 -
+
+#<source src="https://weblio.hs.llnwd.net/e7/img/dict/kenej/audio/S-A130EA2_E-A132F86.mp3"
