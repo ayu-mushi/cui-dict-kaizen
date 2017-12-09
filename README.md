@@ -23,6 +23,7 @@ Keywords: Dictionary, Weblio, Japanese, English
 `je -w` でクリップボード監視。ただしxselが必要。
 
 あと検索にagが必要だが、grepに書き換えても良い。
+`pronun`はmp3をダウンロードして発音する。
 
 ##インストール
 ```bash
