@@ -1,5 +1,6 @@
 #!/bin/bash
 
+function usual_execution(){
 WEBLIO="https://ejje.weblio.jp/content/$1"
 
 FILE=$(curl -s $WEBLIO)
@@ -10,3 +11,14 @@ AUDIOURL=$(echo $AUDIO | sed -e 's/<source src="\(.*mp3\)".*/\1/g')
 curl -s $AUDIOURL | mpg321 -
 
 #<source src="https://weblio.hs.llnwd.net/e7/img/dict/kenej/audio/S-A130EA2_E-A132F86.mp3"
+}
+
+getopts "w" opts
+
+case $opts in
+  w) watch "pronun \$(xsel --clipboard)";; 
+  ?) for arg in $@
+  do
+    usual_execution "$arg"
+  done;;
+esac
