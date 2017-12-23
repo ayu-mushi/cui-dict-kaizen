@@ -27,9 +27,10 @@ if [ -z "$AG" ] || [ $ISNEW = true ]; then
   DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
   #PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
   PHONETIC=$(echo "$FILE" | ag --no-numbers '<b class=KejjeHt>' | sed -e 's/^.*<b class=KejjeLb>発音記号<\/b>//g' | sed -e "s/<b class=KejjeLb>音声を聞く<\/b>.*$//g")
-  PHONETIC=$(echo "$PHONETIC" | sed -e "s/<[^>]*>//g")
+  PHONETIC=$(echo "$PHONETIC" | sed -e "s/<[^>]*>//g" | sed -e "s/\///g" | sed -e "s/\#/SHARP/g" | sed -e "s/; /,,/g" | sed -e "s/ /,,/g")
+  PHONETIC=$(w3m file:///cgi-bin/code.cgi?$PHONETIC -dump)
   OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
-  OUTPUT="$OUTPUT 【発音】$PHONETIC"
+  OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
   # 調べた結果を辞書に書き出す
   echo "$OUTPUT" >> $DICT
 else
