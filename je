@@ -47,19 +47,19 @@ echo "$OUTPUT"
 
 case $OUTPUT in
   *→*\ の過去形*)
-    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
   *→*\ の過去分詞*)
-    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去分詞.*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去分詞.*$/\1/"`;;
   *→*\ の複数形*)
-    je `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
   *を参照*)
-    je `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^ ]*\)を参照.*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^ ]*\)を参照.*$/\1/"`;;
   *Plural\ form\ of\ *)
-    je `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
   *Present\ participle\ of\ *)
-    je `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
   *＝*)
-    je `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
+    usual_execution `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
 esac
 }
 
