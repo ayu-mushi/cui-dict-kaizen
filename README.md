@@ -30,4 +30,5 @@ Keywords: Dictionary, Weblio, Japanese, English
 git clone https://github.com/ayu-mushi/cui-dict-kaizen
 cd path/to/cui-dict-kaizen
 sudo cp je /usr/local/bin
+cp code.cgi /path/to/w3m/cgi-bin
 ```
