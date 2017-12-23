@@ -7,6 +7,7 @@
 # 例: Haskell Curry を調べるときは `je haskell+curry`
 
 ISNEW=false
+PHONE_ONLY=false
 
 function usual_execution(){
 #WEBLIO="http://ejje.weblio.jp/content/$1"
@@ -23,14 +24,18 @@ TAG_PATTERN="s/<(\".*?\"|'.*?'|[^'\"])*?>//g"
 OUTPUT=""
 
 if [ -z "$AG" ] || [ $ISNEW = true ]; then
-  FILE=$(curl -s $WEBLIO | sed -e "s/\*/--/g")
+  FILE=$(curl -s $WEBLIO | sed -e "s/\*/--/g" | sed -e "s/ɪ/\&\#618\;/g" | sed -e "s/é/\&\#233\;/g")
   DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
   #PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
   PHONETIC=$(echo "$FILE" | ag --no-numbers '<b class=KejjeHt>' | sed -e 's/^.*<b class=KejjeLb>発音記号<\/b>//g' | sed -e "s/<b class=KejjeLb>音声を聞く<\/b>.*$//g")
   PHONETIC=$(echo "$PHONETIC" | sed -e "s/<[^>]*>//g" | sed -e "s/\///g" | sed -e "s/\#/SHARP/g" | sed -e "s/; /,,/g" | sed -e "s/ /,,/g")
   PHONETIC=$(w3m "file:///cgi-bin/code.cgi?$PHONETIC" -dump)
-  OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
-  OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
+  if [ $PHONE_ONLY = false ]; then
+    OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
+    OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
+  else
+    OUTPUT="【発音】/$PHONETIC/"
+  fi
   # 調べた結果を辞書に書き出す
   echo "$OUTPUT" >> $DICT
 else
@@ -57,11 +62,12 @@ case $OUTPUT in
 esac
 }
 
-getopts "wn:" opts
+getopts "wn:i:" opts
 
 case $opts in
   w) watch "je \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
   n) ISNEW=true usual_execution "$OPTARG" ISNEW=false;;
+  i) PHONE_ONLY=true usual_execution "$OPTARG";;
   ?) for arg in $@
   do
     usual_execution "$arg"
