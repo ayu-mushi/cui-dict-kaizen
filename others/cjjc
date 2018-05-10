@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# ref: CUI超お手軽英語辞書 - capriccioso String Creating(Object something){ return My.Expression(something); } (http://d.hatena.ne.jp/its_out_of_tune/20120610/1339311044)
+# + メモ化 & 言及英単語を再帰的呼び出し & 発音 & クリップボード監視翻訳
+
+# 複数の語を分かち書きしたものからなる節を調べるときは語と語の間を(空白ではなく)プラス記号で区切る
+# 例: Haskell Curry を調べるときは `je haskell+curry`
+
+ISNEW=false
+PHONE_ONLY=false
+
+function usual_execution(){
+#WEBLIO="http://ejje.weblio.jp/content/$1"
+WEBLIO="https://cjjc.weblio.jp/content/$1"
+DICT="$HOME/Dropbox/dict.txt"
+
+if [ ! -e $DICT ]; then
+  touch $DICT
+fi
+
+PATTERN="^$(echo $1 | sed -e "s/\+/\ /g")の意味や和訳|^$(echo $1 | sed -e "s/\+/\ /g")を中国語に訳すと"
+AG=$(ag -i --no-numbers "$PATTERN" $DICT | tail -n 1)
+TAG_PATTERN="s/<(\".*?\"|'.*?'|[^'\"])*?>//g"
+OUTPUT=""
+
+if [ -z "$AG" ] || [ $ISNEW = true ]; then
+  FILE=$(curl -s $WEBLIO | sed -e "s/\*/--/g")
+  DESC=$(echo "$FILE" | ag --no-numbers 'name="description"')
+  #PHONETIC=$(echo "$FILE" | ag --no-numbers 'class=phoneticEjjeDesc' | sed -e 's/^[^"]*<span class=phoneticEjjeDesc>\([^(\<|\>)]*\)<\/span><span class=phoneticEjjeDc>.米国英語.<\/span>/\1/g' | sed -e 's/\, .*$//g')
+  PHONETIC=$(echo "$FILE" | ag --no-numbers '<b class=KejjeHt>' | sed -e 's/^.*<b class=KejjeLb>発音記号<\/b>//g' | sed -e "s/<b class=KejjeLb>音声を聞く<\/b>.*$//g")
+  PHONETIC=$(echo "$PHONETIC" | sed -e "s/<[^>]*>//g" | sed -e "s/\///g")
+  echo $PHONETIC > /tmp/phonetic.txt
+  PHONETIC=$(w3m "file:///cgi-bin/code.cgi" -dump)
+  if [ $PHONE_ONLY = false ]; then
+    OUTPUT=$(echo $DESC | sed -e 's/<meta name="description" content="\([^"]*\)\-.*$/\1/' | sed -e 's/\*\*/\\\*\\\*/g')
+    OUTPUT="$OUTPUT 【発音】/$PHONETIC/"
+  else
+    OUTPUT="【発音】/$PHONETIC/"
+  fi
+  # 調べた結果を辞書に書き出す
+  echo "$OUTPUT" >> $DICT
+else
+  OUTPUT="$AG(from dict)"
+fi
+
+echo "$OUTPUT"
+
+case $OUTPUT in
+  *→*\ の過去形*)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去形.*$/\1/"`;;
+  *→*\ の過去分詞*)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の過去分詞.*$/\1/"`;;
+  *→*\ の複数形*)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*→\([^<]*\)\ の複数形.*$/\1/"`;;
+  *を参照*)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*印欧語根などは\([^ ]*\)を参照.*$/\1/"`;;
+  *Plural\ form\ of\ *)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*Plural\ form\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *Present\ participle\ of\ *)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*Present\ participle\ of\ \([^\ ]*\)\..*$/\1/"`;;
+  *＝*)
+    usual_execution `echo $OUTPUT | sed -e "s/^.*＝\([^\ ]*\)\..*$/\1/"`;;
+esac
+}
+
+getopts "wn:i:" opts
+
+case $opts in
+  w) watch "cjjc \$(xsel --clipboard)";; # watch clipboard and traslate it repeatedly
+  n) ISNEW=true usual_execution "$OPTARG" ISNEW=false;;
+  i) PHONE_ONLY=true usual_execution "$OPTARG";;
+  ?) for arg in $@
+  do
+    usual_execution "$arg"
+  done;;
+esac
