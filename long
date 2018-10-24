@@ -1,0 +1,22 @@
+#!/usr/bin/ruby
+
+
+require 'open-uri'
+require 'nokogiri'
+# 参考：https://morizyun.github.io/blog/ruby-nokogiri-scraping-tutorial/index.html
+
+url = 'https://ejje.weblio.jp/content/' + ARGV[0]
+
+charset = nil
+html = open(url) do |f|
+  charset = f.charset
+  f.read
+end
+
+doc = Nokogiri::HTML.parse(html, nil, charset)
+main=doc.xpath("//*[@id='main']")
+mainBlock=doc.css(".hideDictPrs")
+
+mainBlock.reverse.each do |e|
+  print( e.text.gsub(/\n\n\n\n/m, "").gsub(/<!--.*-->/m, ""))
+end
